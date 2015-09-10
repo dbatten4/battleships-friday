@@ -1,6 +1,6 @@
 class Board
 
-  attr_reader :board, :map
+  attr_reader :board, :map, :hits, :misses
 
   def initialize
     @board = ["A1","A2","A3","A4","A5","A6","A7","A8","A9","A10",
@@ -25,81 +25,100 @@ class Board
               "I1","I2","I3","I4","I5","I6","I7","I8","I9","I10",
               "J1","J2","J3","J4","J5","J6","J7","J8","J9","J10"]
 
-    @al_hits = []
-    
+    @hits = []
+    @misses = []
+
   end
+
   def place(ship, coord, direction)
-    fail "Ships are overlapped" if overlap?(ship.size, coord, direction)
-    i=board.index(coord)
+
+    overlap_or_off_board_fail(ship.size, coord, direction)
+
+    i = board.index(coord)
     board[i] = ship
+    d = direction[0].downcase
     n = 1
+
     while n < ship.size
-      if direction == 'N'
-        i += 10
-        board[i] = ship
-      elsif direction == 'S'
+      if d == 'n'
         i -= 10
         board[i] = ship
-      elsif direction == 'E'
-        i -= 1
+      elsif d == 's'
+        i += 10
         board[i] = ship
-      elsif direction =='W'
+      elsif d == 'e'
         i += 1
+        board[i] = ship
+      elsif d =='w'
+        i -= 1
         board[i] = ship
       else
         raise 'Invalid direction'
       end
       n += 1
     end
+
   end
 
   def fire(coord)
-    fail 'Shoot in the same place' if already_hit?(coord) 
+
+    duplicate_shot?(coord)
+
     i = map.index(coord)
+
     if board[i] != map[i]
-    puts "Hit!"
+      puts "Hit!"
       board[i].hit
-      @al_hits << coord
-      puts 'Game Over' if all_ship_dead?
+      @hits << coord
+
+      winner?
+
     else
       puts "Miss!"
+      @misses << coord
+    end
+
   end
+
+  def winner?
+    puts "Congratulations you have won the game!" if board.select{|s| s.class == Ship}.all? {|d| d.health == 0}
   end
-    def all_ship_dead?
-      board.select{|s| s.class == Ship}.all? {|d| d.health == 0}
+
+  def duplicate_shot?(coord)
+    raise "You've already recorded a hit in that location" if hits.include?(coord)
+    raise "You've already recorded a miss in that location" if misses.include?(coord)
   end
-  def already_hit?(coord)
-    @al_hits.include?(coord) 
-  end
-  
-  def overlap?(size, coord, direction)
-    i=map.index(coord)
+
+  def overlap_or_off_board_fail(size, coord, direction)
+    i = map.index(coord)
+    d = direction[0].downcase
+    error_message = "Unable to place ship. Either overlaps or placed off the board"
+
     if board[i] != map[i] || board[i] == nil
-     true
-   end
+     raise error_message
+    end
+
     n = 1
     while n < size
-      if direction == 'N'
-        i += 10
-        return true if board[i] != map[i] || board[i] == nil
-      elsif direction == 'S'
+      if d == 'n'
         i -= 10
-      return true if board[i] != map[i] || board[i] == nil
-      elsif direction == 'E'
-        i -= 1
-        return true if board[i] != map[i] || board[i] == nil
-      elsif direction =='W'
+        raise error_message if board[i] != map[i] || board[i] == nil
+      elsif d == 's'
+        i += 10
+        raise error_message if board[i] != map[i] || board[i] == nil
+      elsif d == 'e'
         i += 1
-       return true if board[i] != map[i] || board[i] == nil
+        raise error_message if board[i] != map[i] || board[i] == nil
+      elsif d =='w'
+        i -= 1
+        raise error_message if board[i] != map[i] || board[i] == nil
       else
         raise 'Invalid direction'
       end
       n += 1
     end
-    
-    
+
   end
-     
-  
+
 end
 

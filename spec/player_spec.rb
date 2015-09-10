@@ -1,3 +1,3 @@
-require 'player' 
-describe Player do 
-end
+require 'player'
+
+
