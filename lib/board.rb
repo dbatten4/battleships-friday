@@ -32,7 +32,8 @@ class Board
 
   def place(ship, coord, direction)
 
-    overlap_or_off_board_fail(ship.size, coord, direction)
+    overlap_fail(ship.size, coord, direction)
+    off_the_board_fail(ship.size, coord, direction)
 
     i = board.index(coord)
     board[i] = ship
@@ -89,12 +90,12 @@ class Board
     raise "You've already recorded a miss in that location" if misses.include?(coord)
   end
 
-  def overlap_or_off_board_fail(size, coord, direction)
+  def overlap_fail(size, coord, direction)
     i = map.index(coord)
     d = direction[0].downcase
-    error_message = "Unable to place ship. Either overlaps or placed off the board"
+    error_message = "Unable to place ship. Overlapping ships"
 
-    if board[i] != map[i] || board[i] == nil
+    if board[i] != map[i]
      raise error_message
     end
 
@@ -102,22 +103,49 @@ class Board
     while n < size
       if d == 'n'
         i -= 10
-        raise error_message if board[i] != map[i] || board[i] == nil
+        raise error_message if board[i] != map[i]
       elsif d == 's'
         i += 10
-        raise error_message if board[i] != map[i] || board[i] == nil
+        raise error_message if board[i] != map[i] 
       elsif d == 'e'
         i += 1
-        raise error_message if board[i] != map[i] || board[i] == nil
+        raise error_message if board[i] != map[i]
       elsif d =='w'
         i -= 1
-        raise error_message if board[i] != map[i] || board[i] == nil
+        raise error_message if board[i] != map[i]
       else
         raise 'Invalid direction'
       end
       n += 1
     end
 
+  end
+
+  def off_the_board_fail(size, coord, direction)
+    i = map.index(coord)
+    d = direction[0].downcase
+    error_message = "Unable to place ship. Ship placed off the board"
+
+    if board[i] == nil
+     raise error_message
+    end
+
+    board_width = 10
+    row_number = i / board_width + 1
+    column_number = i % board_width + 1
+
+
+    if d == 'n'
+      raise error_message if row_number - size < 0
+    elsif d == 's'
+      raise error_message if row_number + size > board_width
+    elsif d == 'e'
+      raise error_message if column_number + size > board_width
+    elsif d =='w'
+      raise error_message if column_number - size < 0
+    else
+      raise 'Invalid direction'
+    end
   end
 
 end

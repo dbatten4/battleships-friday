@@ -9,7 +9,7 @@ describe Board do
   describe '#place' do
 
     it 'we can put a ship on the board' do
-      subject.place(ship, 'A1', 'N')
+      subject.place(ship, 'A1', 'S')
       expect(subject.board.include?(ship)).to be_truthy
     end
 
@@ -20,11 +20,11 @@ describe Board do
 
     it 'ships cannot overlap' do
       subject.place(ship_size_3, 'E5', 'N')
-      expect{subject.place(ship_size_3, 'D4', 'E')}.to raise_error "Unable to place ship. Either overlaps or placed off the board"
+      expect{subject.place(ship_size_3, 'D4', 'E')}.to raise_error "Unable to place ship. Overlapping ships"
     end
 
     it 'raise error when ship is off the board' do
-      expect{subject.place(ship_size_3, 'I5', 'S')}.to raise_error "Unable to place ship. Either overlaps or placed off the board"
+      expect{subject.place(ship_size_3, 'A1', 'N')}.to raise_error "Unable to place ship. Ship placed off the board"
     end
 
   end
